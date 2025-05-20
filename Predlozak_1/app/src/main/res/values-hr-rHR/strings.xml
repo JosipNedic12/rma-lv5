@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+        <string name="hello_miljenko">Pozdrav Miljenko</string>
+        <string name="your_bmi">Tvoj BMI je: %1$d</string>
+        <string name="recommended_exercises">Preporučene vježbe:</string>
+
+</resources>
