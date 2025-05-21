@@ -286,10 +286,9 @@ fun StepCounter(navController: NavController, modifier: Modifier = Modifier) {
     val stepCount = remember { mutableStateOf(0) }
     val lastSavedThreshold = remember { mutableStateOf(0) }
 
-    // Firestore instance
     val firestore = Firebase.firestore
+    val lastStepTime = remember { mutableStateOf(0L) }
 
-    // Sensor event listener
     val sensorEventListener = remember {
         object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
@@ -298,15 +297,16 @@ fun StepCounter(navController: NavController, modifier: Modifier = Modifier) {
                     val y = it.values[1]
                     val z = it.values[2]
                     val magnitude = sqrt(x * x + y * y + z * z)
-                    if (magnitude > 12f) {
+                    val currentTime = System.currentTimeMillis()
+                    if (magnitude > 12f && (currentTime - lastStepTime.value) > 250) {
                         stepCount.value += 1
-
+                        lastStepTime.value = currentTime
                         if (stepCount.value / 50 > lastSavedThreshold.value / 50) {
                             lastSavedThreshold.value = stepCount.value
 
                             showStepNotification(context, stepCount.value)
 
-                            firestore.collection("BMI").add(
+                            firestore.collection("Koraci").add(
                                 hashMapOf(
                                     "koraci" to stepCount.value,
                                     "timestamp" to FieldValue.serverTimestamp()
@@ -330,7 +330,9 @@ fun StepCounter(navController: NavController, modifier: Modifier = Modifier) {
     }
 
 
-    Box(modifier = modifier.fillMaxSize().background(Color.White),) {
+    Box(modifier = modifier
+        .fillMaxSize()
+        .background(Color.White),) {
         Image(
             painter = painterResource(id = R.drawable.fitness),
             contentDescription = "Pozadinska slika",
@@ -343,7 +345,9 @@ fun StepCounter(navController: NavController, modifier: Modifier = Modifier) {
         }
         Button(
             onClick = { navController.navigate("main_screen") },
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
         ) {
             Text("Idi na glavni ekran")
         }
